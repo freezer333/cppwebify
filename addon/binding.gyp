@@ -13,7 +13,7 @@
         "include", "../primesieve-5.4.2/include"
       ],
       'libraries': [
-         '-lprimesieve', '-L../primesieve-5.4.2/.libs/libprimesieve.so.4'
+         '../../primesieve-5.4.2/.libs/libprimesieve.so.4.0.2',
       ]
     }
   ]
