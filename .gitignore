@@ -5,3 +5,9 @@ config.status
 libtool
 .deps
 stamp-h1
+*.lo
+*.la
+*.o
+.libs
+.dirstamp
+primesieve
