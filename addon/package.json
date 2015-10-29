@@ -1,0 +1,13 @@
+{
+  "name": "primesieve4node",
+  "version": "1.0.0",
+  "description": "",
+  "main": "build/Release/primesieve.node",
+  "scripts": {
+    "pre-install": "echo \"Should be running ./configure and make!\" ",
+    "install": "node-gyp rebuild"
+  },
+  "author": "Scott Frees <scott.frees@gmail.com> (http://scottfrees.com/)",
+  "license": "ISC",
+  "gypfile": true
+}
