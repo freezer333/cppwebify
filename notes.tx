@@ -1,1 +1,0 @@
-g++ -o basic --std=c++11 basic.cpp ../primesieve-5.4.2/.libs/libprimesieve.so.4 -lprimesieve
