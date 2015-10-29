@@ -9,6 +9,9 @@
           '-std=c++11'
         ],
       },
+      "include_dirs": [
+        "include", "../primesieve-5.4.2/include"
+      ]
     }
   ]
 }
