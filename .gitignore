@@ -12,3 +12,4 @@ stamp-h1
 .dirstamp
 primesieve
 addon/build/
+node_modules/
