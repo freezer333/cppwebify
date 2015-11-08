@@ -1,0 +1,16 @@
+C++ standalone program with c code linked directly into executable
+ - windows
+ - linux
+ - mac (proven)
+
+C++ standalone program with c dynamic library -> executable
+ - windows
+ - linux
+ - mac (proven)
+
+Node ffi loading dynamic library
+ - windows
+ - linux
+ - mac (proven)
+
+ 

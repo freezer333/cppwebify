@@ -1,21 +1,24 @@
 #include <node.h>
 #include <v8.h>
 
-#include <primesieve.hpp>
+//#include <primesieve.hpp>
 #include <iostream>
 #include <vector>
+#include "prime_sieve.h"
 
 using namespace v8;
 
 
 void GeneratePrimes(const v8::FunctionCallbackInfo<v8::Value>& args) {
 
-  std::vector<int> primes;
+  /*std::vector<int> primes;
   primesieve::generate_primes(1000, 2000, &primes);
 
   for (auto i: primes) {
   	std::cout << i << std::endl;
-  }
+  }*/
+
+  generate_primes(10000);
   
   Isolate* isolate = args.GetIsolate();
   Local<Number> retval = v8::Number::New(isolate, 0);
