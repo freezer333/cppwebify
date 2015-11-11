@@ -1,12 +1,14 @@
+#define _batonclass
 
 
-#ifdef _batonclass
-extern "C" {
-#endif
+#include <iostream>
+using namespace std;
 
-void pass(void * thebaton, int data);
+class baton {
+public:
+    void send(int data){
+        cout << "From C++ => " << data << endl;
+    }
+};
 
-#ifdef _batonclass
-}
-#endif
-
+#include "cbaton.h"

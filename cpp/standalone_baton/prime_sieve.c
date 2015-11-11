@@ -3,7 +3,7 @@
 #include <stdlib.h>/* SUM_{p<x} 1/p= ln(ln(x))+0.5772156649015-0.315718451893 */
 #include <math.h>  /* extern double sqrt(double), log(double), floor(double); */
 
-#include "baton.h" /* This is added so we can post back to C++ */
+#include "cbaton.h" /* This is added so we can post back to C++ */
 
 
 
