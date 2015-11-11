@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stdio.h>
-
+#include <functional>
 
 #include "baton.h"
 #include "prime_sieve.h"
@@ -21,5 +21,12 @@ using namespace std;
 // that maps to JavaScript.
 int main(int argc, char ** argvs) {
     baton b;
-    generate_primes(1000, &b);
+    b.setCallback(
+        [&](int data) { 
+            cout << "I got " << data << endl;
+            return 0;
+        }
+
+    );
+    generate_primes(1000, (void*)&b);
 }
