@@ -1,0 +1,35 @@
+******************************************
+lib4ffi
+------------------------------------------
+For the library dll version, use the ref array approach
+https://github.com/TooTallNate/ref-array
+
+Idea is to have the cpp wrapper in prime_sieve.c accept an integer array.
+Modify primesieve code to add to the array, rather than print each prime number
+
+use the ffi interface
+
+******************************************
+standard node addon
+------------------------------------------
+utilize the same code from lib4ffi - now
+v8 will call it directly, allowing the array
+to be filled.
+
+******************************************
+incremental node addon
+------------------------------------------
+Now we want the thing to be asynchronous.
+We'll need to modify primesieve to call
+a function that will post a message back to
+node.js.
+
+In node-js, we'll actually make this a stream
+interface - which will be super cool!
+
+gobetween.h
+    exposes a function that accepts an void * to the gobetween, and a data item
+
+gobetween.cpp
+    casts the void * to a class
+    calls class->invoke_node_callback(data); 
