@@ -3,7 +3,7 @@
 TOOLSET := target
 TARGET := standalone_usr
 DEFS_Debug := \
-	'-D_DARWIN_USE_64_BIT_INODE=1' \
+	'-DNODE_GYP_MODULE_NAME=standalone_usr' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64' \
 	'-DDEBUG' \
@@ -11,74 +11,64 @@ DEFS_Debug := \
 
 # Flags passed to all source files.
 CFLAGS_Debug := \
-	-O0 \
-	-gdwarf-2 \
-	-mmacosx-version-min=10.5 \
-	-arch x86_64 \
+	-fPIC \
+	-pthread \
 	-Wall \
-	-Wendif-labels \
-	-W \
-	-Wno-unused-parameter
+	-Wextra \
+	-Wno-unused-parameter \
+	-m64 \
+	-Wall \
+	-std=c++11 \
+	-g \
+	-O0
 
 # Flags passed to only C files.
-CFLAGS_C_Debug := \
-	-fno-strict-aliasing
+CFLAGS_C_Debug :=
 
 # Flags passed to only C++ files.
 CFLAGS_CC_Debug := \
 	-fno-rtti \
 	-fno-exceptions \
-	-fno-threadsafe-statics \
-	-fno-strict-aliasing
-
-# Flags passed to only ObjC files.
-CFLAGS_OBJC_Debug :=
-
-# Flags passed to only ObjC++ files.
-CFLAGS_OBJCC_Debug :=
+	-std=gnu++0x
 
 INCS_Debug := \
-	-I/Users/sfrees/.node-gyp/0.12.5/src \
-	-I/Users/sfrees/.node-gyp/0.12.5/deps/uv/include \
-	-I/Users/sfrees/.node-gyp/0.12.5/deps/v8/include
+	-I/home/sfrees/.node-gyp/4.0.0/src \
+	-I/home/sfrees/.node-gyp/4.0.0/deps/uv/include \
+	-I/home/sfrees/.node-gyp/4.0.0/deps/v8/include
 
 DEFS_Release := \
-	'-D_DARWIN_USE_64_BIT_INODE=1' \
+	'-DNODE_GYP_MODULE_NAME=standalone_usr' \
 	'-D_LARGEFILE_SOURCE' \
 	'-D_FILE_OFFSET_BITS=64'
 
 # Flags passed to all source files.
 CFLAGS_Release := \
-	-Os \
-	-gdwarf-2 \
-	-mmacosx-version-min=10.5 \
-	-arch x86_64 \
+	-fPIC \
+	-pthread \
 	-Wall \
-	-Wendif-labels \
-	-W \
-	-Wno-unused-parameter
+	-Wextra \
+	-Wno-unused-parameter \
+	-m64 \
+	-Wall \
+	-std=c++11 \
+	-O3 \
+	-ffunction-sections \
+	-fdata-sections \
+	-fno-omit-frame-pointer
 
 # Flags passed to only C files.
-CFLAGS_C_Release := \
-	-fno-strict-aliasing
+CFLAGS_C_Release :=
 
 # Flags passed to only C++ files.
 CFLAGS_CC_Release := \
 	-fno-rtti \
 	-fno-exceptions \
-	-fno-threadsafe-statics \
-	-fno-strict-aliasing
-
-# Flags passed to only ObjC files.
-CFLAGS_OBJC_Release :=
-
-# Flags passed to only ObjC++ files.
-CFLAGS_OBJCC_Release :=
+	-std=gnu++0x
 
 INCS_Release := \
-	-I/Users/sfrees/.node-gyp/0.12.5/src \
-	-I/Users/sfrees/.node-gyp/0.12.5/deps/uv/include \
-	-I/Users/sfrees/.node-gyp/0.12.5/deps/v8/include
+	-I/home/sfrees/.node-gyp/4.0.0/src \
+	-I/home/sfrees/.node-gyp/4.0.0/deps/uv/include \
+	-I/home/sfrees/.node-gyp/4.0.0/deps/v8/include
 
 OBJS := \
 	$(obj).target/$(TARGET)/../prime_sieve.o \
@@ -92,8 +82,6 @@ all_deps += $(OBJS)
 $(OBJS): TOOLSET := $(TOOLSET)
 $(OBJS): GYP_CFLAGS := $(DEFS_$(BUILDTYPE)) $(INCS_$(BUILDTYPE))  $(CFLAGS_$(BUILDTYPE)) $(CFLAGS_C_$(BUILDTYPE))
 $(OBJS): GYP_CXXFLAGS := $(DEFS_$(BUILDTYPE)) $(INCS_$(BUILDTYPE))  $(CFLAGS_$(BUILDTYPE)) $(CFLAGS_CC_$(BUILDTYPE))
-$(OBJS): GYP_OBJCFLAGS := $(DEFS_$(BUILDTYPE)) $(INCS_$(BUILDTYPE))  $(CFLAGS_$(BUILDTYPE)) $(CFLAGS_C_$(BUILDTYPE)) $(CFLAGS_OBJC_$(BUILDTYPE))
-$(OBJS): GYP_OBJCXXFLAGS := $(DEFS_$(BUILDTYPE)) $(INCS_$(BUILDTYPE))  $(CFLAGS_$(BUILDTYPE)) $(CFLAGS_CC_$(BUILDTYPE)) $(CFLAGS_OBJCC_$(BUILDTYPE))
 
 # Suffix rules, putting all outputs into $(obj).
 
@@ -120,29 +108,19 @@ $(obj).$(TOOLSET)/$(TARGET)/%.o: $(obj)/%.cpp FORCE_DO_CMD
 # End of this set of suffix rules
 ### Rules for final target.
 LDFLAGS_Debug := \
-	-Wl,-search_paths_first \
-	-mmacosx-version-min=10.5 \
-	-arch x86_64 \
-	-L$(builddir)
-
-LIBTOOLFLAGS_Debug := \
-	-Wl,-search_paths_first
+	-pthread \
+	-rdynamic \
+	-m64
 
 LDFLAGS_Release := \
-	-Wl,-search_paths_first \
-	-mmacosx-version-min=10.5 \
-	-arch x86_64 \
-	-L$(builddir)
+	-pthread \
+	-rdynamic \
+	-m64
 
-LIBTOOLFLAGS_Release := \
-	-Wl,-search_paths_first
-
-LIBS := \
-	-undefined dynamic_lookup
+LIBS :=
 
 $(builddir)/standalone_usr: GYP_LDFLAGS := $(LDFLAGS_$(BUILDTYPE))
 $(builddir)/standalone_usr: LIBS := $(LIBS)
-$(builddir)/standalone_usr: GYP_LIBTOOLFLAGS := $(LIBTOOLFLAGS_$(BUILDTYPE))
 $(builddir)/standalone_usr: LD_INPUTS := $(OBJS)
 $(builddir)/standalone_usr: TOOLSET := $(TOOLSET)
 $(builddir)/standalone_usr: $(OBJS) FORCE_DO_CMD

@@ -1,5 +1,11 @@
 #include <stdio.h> /* Achim Flammenkamp, Bielefeld, D, achim@uni-bielefeld.de */
+
+#ifdef __APPLE__
 #include <malloc/malloc.h>/* ifdefs:  LONG=uns64  _ANSI_EXTENSION  true_64bit_words  */
+#else
+#include <malloc.h>
+#endif
+
 #include <stdlib.h>/* SUM_{p<x} 1/p= ln(ln(x))+0.5772156649015-0.315718451893 */
 #include <math.h>  /* extern double sqrt(double), log(double), floor(double); */
 #ifndef  uns32              /*  Version 1.0a 1998-05-19  source availible     */
