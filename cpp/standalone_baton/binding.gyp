@@ -1,9 +1,9 @@
 {
   "targets": [
     {
-      "target_name": "standalone_baton",
+      "target_name": "standalone_arbiter",
       "type": "executable",
-      "sources": [ "prime_sieve.h", "prime_sieve.c", "baton.cpp", "main.cpp"],
+      "sources": [ "prime_sieve.h", "prime_sieve.c", "arbiter.cpp", "main.cpp"],
       "cflags": ["-Wall", "-std=c++11", "-stdlib=libc++"],
       "conditions": [ 
         [ 'OS=="mac"', { 

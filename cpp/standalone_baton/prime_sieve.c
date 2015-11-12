@@ -3,7 +3,7 @@
 #include <stdlib.h>/* SUM_{p<x} 1/p= ln(ln(x))+0.5772156649015-0.315718451893 */
 #include <math.h>  /* extern double sqrt(double), log(double), floor(double); */
 
-#include "cbaton.h" /* This is added so we can post back to C++ */
+#include "carbiter.h" /* This is added so we can post back to C++ */
 
 
 
@@ -35,19 +35,19 @@
 #define  SIEVE_SIZE  (16<<10)
 
 #ifdef  DEBUG
-#define  use(x)  /*fprintf(out, UL"\n",x)*/pass(baton, x),  anz++;
+#define  use(x)  /*fprintf(out, UL"\n",x)*/pass(arbiter, x),  anz++;
 #elif defined(TEST)
 #define  use(x)  anz++;
 #else
 #define  use(x)  do { /*  if(max<=x-last)printf(UL" "UL"\n",x,max=x-last);  */ \
-                      /* sum += 1.0/x, */ /*fprintf(out, UL"\n",x)*/pass(baton, x), last=x; anz++; } while(0);
+                      /* sum += 1.0/x, */ /*fprintf(out, UL"\n",x)*/pass(arbiter, x), last=x; anz++; } while(0);
 double  sum=0.0;
 LONG  max=0, last=2;
 #endif
 
 
 // This was the main function - I've changed it to a callable function instead
-int do_primesieve(int argc, char *argv[], void * baton)
+int do_primesieve(int argc, char *argv[], void * arbiter)
 {
 uns32 register  size, hi, h, i, j, ji, js;
 uns32  k, hj, c, cj;
@@ -636,11 +636,11 @@ return  anz;
 
 
 
-int generate_primes(int under, void * baton) {
+int generate_primes(int under, void * arbiter) {
   char * name = "primes";
   char param [50];
   sprintf(param, "%d", under);
   char * values[] = { name, param};
-  do_primesieve(2, values, baton);
+  do_primesieve(2, values, arbiter);
 
 }
