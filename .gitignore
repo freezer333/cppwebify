@@ -13,3 +13,4 @@ stamp-h1
 primesieve
 cpp/*/build/
 node_modules/
+npm-debug.log

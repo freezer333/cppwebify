@@ -2,7 +2,7 @@
   "targets": [
     {
       "target_name": "libprime",
-      "type": "executable",
+      "type": "shared_library",
       "sources": [ "../prime4lib/prime_sieve.h", "../prime4lib/prime_sieve.c", "../prime4lib/arbiter.cpp", "primeapi.cpp"],
       "cflags": ["-Wall", "-std=c++11"],
       "include_dirs" : ['../prime4lib'],
