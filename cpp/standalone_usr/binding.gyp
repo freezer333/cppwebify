@@ -3,8 +3,9 @@
     {
       "target_name": "standalone_usr",
       "type": "executable",
-      "sources": [ "../prime_sieve.h", "../prime_sieve.c", "main.cpp"],
+      "sources": [ "../prime4standalone/prime_sieve.c", "main.cpp"],
       "cflags": ["-Wall", "-std=c++11"],
+      "include_dirs" : ['../prime4standalone'],
       "conditions": [ 
         [ 'OS=="mac"', { 
             "xcode_settings": { 

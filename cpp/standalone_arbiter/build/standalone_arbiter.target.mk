@@ -34,7 +34,8 @@ CFLAGS_CC_Debug := \
 INCS_Debug := \
 	-I/home/sfrees/.node-gyp/4.0.0/src \
 	-I/home/sfrees/.node-gyp/4.0.0/deps/uv/include \
-	-I/home/sfrees/.node-gyp/4.0.0/deps/v8/include
+	-I/home/sfrees/.node-gyp/4.0.0/deps/v8/include \
+	-I$(srcdir)/../prime4lib
 
 DEFS_Release := \
 	'-DNODE_GYP_MODULE_NAME=standalone_arbiter' \
@@ -68,11 +69,12 @@ CFLAGS_CC_Release := \
 INCS_Release := \
 	-I/home/sfrees/.node-gyp/4.0.0/src \
 	-I/home/sfrees/.node-gyp/4.0.0/deps/uv/include \
-	-I/home/sfrees/.node-gyp/4.0.0/deps/v8/include
+	-I/home/sfrees/.node-gyp/4.0.0/deps/v8/include \
+	-I$(srcdir)/../prime4lib
 
 OBJS := \
-	$(obj).target/$(TARGET)/prime_sieve.o \
-	$(obj).target/$(TARGET)/arbiter.o \
+	$(obj).target/$(TARGET)/../prime4lib/prime_sieve.o \
+	$(obj).target/$(TARGET)/../prime4lib/arbiter.o \
 	$(obj).target/$(TARGET)/main.o
 
 # Add to the list of files we specially track dependencies for.

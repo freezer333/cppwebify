@@ -1,6 +1,6 @@
 #include <iostream>
 #include <stdio.h>
-#include "../prime_sieve.h"
+#include "prime_sieve.h"
 
 using namespace std;
 
