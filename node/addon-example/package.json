@@ -1,0 +1,10 @@
+{
+  "name": "nodeprimesaddong",
+  "version": "0.0.0",
+  "description": "Primes example",
+  "main": "primes.js",
+  "private": true,
+  "dependencies": {
+    "nan": "*"
+  }
+}
