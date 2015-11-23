@@ -8,13 +8,28 @@ app.set('view engine', 'jade');
 app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: true })); 
 
+var types = [
+  { 
+    title: "ffi", 
+    description: "Using Node Foreign Function Interface (ffi) to call C++ code.  Based on /cpp/lib4ffi"
+  }, 
+  { 
+    title: "addon", 
+    description: "Creating a Node Addon that can be called like any other module.  Based on /cpp/nodeprime"
+  }
+  ];
 
-app.get('/', function (req, res) {
-  res.render('index', { title: 'Hey', message: 'Hello there!'});
+
+types.forEach(function (type) {
+    var route = require('./routes/' + type.title);
+    app.use('/'+type.title, route);
 });
 
-var ffi = require('./routes/ffi');
-app.use('/ffi', ffi);
+
+
+app.get('/', function (req, res) {
+  res.render('index', { routes: types});
+});
 
 
 var server = app.listen(3000, function () {

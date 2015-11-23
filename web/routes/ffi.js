@@ -1,10 +1,11 @@
 var express = require('express');
-var filename = require('filename');
+var path = require('path')
 var router = express.Router();
 
+var type = path.basename(__filename).slice(0, -3)
 
 router.get('/', function(req, res) {
-  res.render('primes', {target:filename()});
+  res.render('primes', {target:type});
 });
 
 
@@ -30,6 +31,8 @@ router.post('/', function(req, res) {
     res.end(JSON.stringify({
       results: primes
     }));
+
+    console.log("Primes generated using " + type);
 });
 
   

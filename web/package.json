@@ -23,7 +23,6 @@
     "body-parser": "^1.14.1",
     "express": "^4.13.3",
     "ffi": "*",
-    "filename": "^0.2.0",
     "jade": "^1.11.0",
     "ref": "*",
     "ref-array": "*"
