@@ -10,6 +10,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 var types = [
   { 
+    title: "standalone_args", 
+    description: "Execute C++ executable as a child process, using command line args and stdout.  Based on /cpp/standalone_stdio"
+  },
+  { 
     title: "ffi", 
     description: "Using Node Foreign Function Interface (ffi) to call C++ code.  Based on /cpp/lib4ffi"
   }, 
