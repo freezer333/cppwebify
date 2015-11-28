@@ -10,6 +10,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 var types = [
   { 
+    title: "pure_node", 
+    description: "Execute a really primitive implementation of prime sieve in Node.js"
+  },
+  { 
     title: "standalone_args", 
     description: "Execute C++ executable as a child process, using command line args and stdout.  Based on /cpp/standalone_stdio"
   },
