@@ -3,7 +3,7 @@ var path = require('path')
 var router = express.Router();
 var temp = require('temp');
 var fs = require('fs');
-
+var exec = require( 'child_process' ).exec;
 
 var type = path.basename(__filename).slice(0, -3)
 
@@ -12,28 +12,9 @@ router.get('/', function(req, res) {
 });
 
 router.post('/', function(req, res) {
-
-
     var launch = require('child_process').execFile
     var program = "../cpp/standalone_flex_file/build/Release/standalone_flex_file";
-
     var under = parseInt(req.body.under);
-
-    var process_output = function(err, data) {
-        if (err) throw err;
-        var primes = data.toString()
-                        .split('\n')
-                        .slice(0, -3)
-                        .map(function (line) {
-                            return parseInt(line);
-                        });
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({
-          results: primes
-        }));
-    }
-
-
 
     temp.mkdir('node_example', function(err, dirPath) {
       var inputPath = path.join(dirPath, 'input.txt');
@@ -43,7 +24,24 @@ router.post('/', function(req, res) {
         if (err) throw err;
         var primes = launch(program, [inputPath, outputPath], function(error) {
             if (error ) throw error;
-            fs.readFile(outputPath, process_output);
+            fs.readFile(outputPath, function(err, data) {
+              if (err) throw err;
+              var primes = data.toString()
+                              .split('\n')
+                              .slice(0, -3)
+                              .map(function (line) {
+                                  return parseInt(line);
+                              });
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({
+                results: primes
+              }));
+
+              exec('rm -r ' + dirPath, function(error) {
+                if (error) throw error;
+                console.log("Removed " + dirPath);
+              })
+          });
         });
       });
     });
