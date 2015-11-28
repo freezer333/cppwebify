@@ -18,6 +18,10 @@ var types = [
     description: "Execute C++ executable as a child process, using direct user input.  Based on /cpp/standalone_usr"
   },
   { 
+    title: "standalone_file", 
+    description: "Execute C++ executable as a child process, using an input and output file.  Based on /cpp/standalone_flex_file"
+  },
+  { 
     title: "ffi", 
     description: "Using Node Foreign Function Interface (ffi) to call C++ code.  Based on /cpp/lib4ffi"
   }, 

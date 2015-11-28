@@ -25,6 +25,7 @@
     "ffi": "*",
     "jade": "^1.11.0",
     "ref": "*",
-    "ref-array": "*"
+    "ref-array": "*", 
+    "temp": "*"
   }
 }

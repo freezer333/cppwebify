@@ -10,6 +10,8 @@ using namespace std;
 // arguments, and outputs to a similarly specified file.
 int main(int argc, char ** argvs) {
 
+    fprintf(stdout, "Output saved in %s\n", argvs[2]);
+    
     FILE * in = fopen(argvs[1], "r");
 
     int i;
