@@ -14,6 +14,10 @@ var types = [
     description: "Execute C++ executable as a child process, using command line args and stdout.  Based on /cpp/standalone_stdio"
   },
   { 
+    title: "standalone_usr", 
+    description: "Execute C++ executable as a child process, using direct user input.  Based on /cpp/standalone_usr"
+  },
+  { 
     title: "ffi", 
     description: "Using Node Foreign Function Interface (ffi) to call C++ code.  Based on /cpp/lib4ffi"
   }, 
