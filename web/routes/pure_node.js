@@ -12,10 +12,9 @@ router.get('/', function(req, res) {
 
 
 router.post('/', function(req, res) {
-    
     var under = parseInt(req.body.under);
     var primes = find_primes(under);
-    
+
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({
       results: primes
@@ -34,12 +33,10 @@ var find_primes = function(limit) {
             primes.push(n);
             for (var i = n*n; i < limit; i+= n) {
                 is_prime[i] = false;
-            } 
+            }
         }
     }
     return primes;
 }
-  
+
 module.exports = router;
-
-
