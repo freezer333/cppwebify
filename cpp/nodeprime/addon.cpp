@@ -20,7 +20,7 @@ class PrimeWorker : public AsyncWorker {
 
         void Execute () {
             arbiter b(
-                [&](void * data) { 
+                [&](void * data) {
                     primes.push_back(*((int *) data));
                 }
             );
@@ -31,23 +31,23 @@ class PrimeWorker : public AsyncWorker {
         // We have the results, and we're back in the event loop.
         void HandleOKCallback () {
             Nan:: HandleScope scope;
-    
+
             v8::Local<v8::Array> results = New<v8::Array>(primes.size());
             int i = 0;
-            for_each(primes.begin(), primes.end(), 
-                [&](int value) { 
-                    Set(results, i, New<v8::Number>(value));
+            for_each(primes.begin(), primes.end(),
+                [&](int value) {
+                    Nan::Set(results, i, New<v8::Number>(value));
                     i++;
             });
-    
-   
+
+
             Local<Value> argv[] = {
-                Null(), 
+                Null(),
                 results
             };
 
             callback->Call(2, argv);
-    
+
         }
     private:
         int under;
@@ -64,9 +64,8 @@ NAN_METHOD(CalculatePrimes) {
 
 
 NAN_MODULE_INIT(Init) {
-    Set(target, New<String>("getPrimes").ToLocalChecked(),
+    Nan::Set(target, New<String>("getPrimes").ToLocalChecked(),
         GetFunction(New<FunctionTemplate>(CalculatePrimes)).ToLocalChecked());
 }
 
 NODE_MODULE(addon, Init)
-
