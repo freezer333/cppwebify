@@ -10,5 +10,5 @@ using namespace std;
 // - this is a good example if you can't modify your legacy C++
 // source code, and it always prints to standard out.
 int main(int argc, char ** argvs) {
-    do_primesieve(argc, argvs, stdout);
+    generate_args(argc, argvs, stdout);
 }

@@ -48,7 +48,7 @@ LONG  max=0, last=2;
 
 
 // This was the main function - I've changed it to a callable function instead
-int do_primesieve(int argc, char *argv[], FILE * out)
+int generate_args(int argc, char *argv[], FILE * out)
 {
 uns32 register  size, hi, h, i, j, ji, js;
 uns32  k, hj, c, cj;
@@ -126,9 +126,9 @@ for(;;)
                break;
             }
       } while (1);
-   } 
+   }
    if (8*jj > stop/3)  break;
-   j = 3*(cj+i)+c; 
+   j = 3*(cj+i)+c;
    bi= m - !!m - m/BITS;
    prime_diff[k]= BITS*2*(j/LCM-js); /* difference of successive primes < 480 */
    prime_diff[k] |= bi;
@@ -145,11 +145,11 @@ for(;;)
       switch (c)
       {  do
          {  case 1:  ii += 2*hj;
-                     hi += 2*ji; 
+                     hi += 2*ji;
                      while (hi >= LCM)  hi -= LCM,  ii++;
                      if (ii >= stlcm  &&  hi!=5 && hi!=25)  break;
             case 2:  ii += hj;
-                     hi += ji; 
+                     hi += ji;
                      while (hi >= LCM)  hi -= LCM,  ii++;
                      if (ii >= stlcm  &&  hi!=5 && hi!=25)  break;
          } while(1);
@@ -177,42 +177,42 @@ for(;;)
    switch(m)
    {   do
        {  case 0:   while(hi >= size)
-                    {  hi -= size;  bi+=bi;  
+                    {  hi -= size;  bi+=bi;
                        if (!bi)  goto go_on;
                     }
                     sieve[hi] |= bi;  hi += 2*j;
           case 2:   while(hi >= size)
-                    {  hi -= size;  bi+=bi;  
+                    {  hi -= size;  bi+=bi;
                        if (!bi)  goto go_on;
                     }
                     sieve[hi] |= bi;  hi += hj;
           case 3:   while(hi >= size)
-                    {  hi -= size;  bi+=bi;  
+                    {  hi -= size;  bi+=bi;
                        if (!bi)  goto go_on;
                     }
                     sieve[hi] |= bi;  hi += ji;
           case 4:   while(hi >= size)
-                    {  hi -= size;  bi+=bi;  
+                    {  hi -= size;  bi+=bi;
                        if (!bi)  goto go_on;
                     }
                     sieve[hi] |= bi;  hi += hj;
           case 5:   while(hi >= size)
-                    {  hi -= size;  bi+=bi;  
+                    {  hi -= size;  bi+=bi;
                        if (!bi)  goto go_on;
                     }
                     sieve[hi] |= bi;  hi += ji;
           case 6:   while(hi >= size)
-                    {  hi -= size;  bi+=bi;  
+                    {  hi -= size;  bi+=bi;
                        if (!bi)  goto go_on;
                     }
                     sieve[hi] |= bi;  hi += hj;
           case 7:   while(hi >= size)
-                    {  hi -= size;  bi+=bi;  
+                    {  hi -= size;  bi+=bi;
                        if (!bi)  goto go_on;
                     }
                     sieve[hi] |= bi;  hi += 2*j;
           case 9:   while(hi >= size)
-                    {  hi -= size;  bi+=bi;  
+                    {  hi -= size;  bi+=bi;
                        if (!bi)  goto go_on;
                     }
                     sieve[hi] |= bi;  hi += ji;
@@ -226,16 +226,16 @@ for(;;)
                        sieve[hi] |= bi;  hi += hj;
                        sieve[hi] |= bi;  hi += 2*j;
                        sieve[hi] |= bi;  hi += ji;
-                    } 
+                    }
        } while (1);
        do {
           case 1:   while(hi >= size)
-                    {  hi -= size;  bi+=bi;  
+                    {  hi -= size;  bi+=bi;
                        if (!bi)  goto go_on;
                     }
                     sieve[hi] |= bi;  hi += ji;
           case 8:   while(hi >= size)
-                    {  hi -= size;  bi+=bi;  
+                    {  hi -= size;  bi+=bi;
                        if (!bi)  goto go_on;
                     }
                     sieve[hi] |= bi;  hi += hj;
@@ -543,7 +543,7 @@ while (1)
                             sieve[hi] |=  2;  hi += i;
                          }
                       } while (1);
-                   } 
+                   }
       }
       out0:  index[h] = 0;  goto out;
       out1:  index[h] = 1;  goto out;
@@ -637,11 +637,10 @@ return  anz;
 
 
 
-int generate_primes(int under, FILE *out) {
+int generate(int under, FILE *out) {
   char * name = "primes";
   char param [50];
   sprintf(param, "%d", under);
   char * values[] = { name, param};
   do_primesieve(2, values, out);
-
 }

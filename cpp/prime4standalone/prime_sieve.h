@@ -1,6 +1,10 @@
 
 extern "C" {
-    int do_primesieve(int argc, char *argv[], FILE * out);
+    // the old main, renamed - with a third parameter
+    // to direct output to a file as needed
+    int generate_args(int argc, char *argv[], FILE * out);
 
-    int generate_primes(int under, FILE *out);
+    // an adapter function when the caller hasn't
+    // received under through command line arguments
+    int generate(int under, FILE *out);
 }
