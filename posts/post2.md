@@ -6,9 +6,9 @@ Explain again which circumstance this is best for
 # Primesieve C/C++ implementation
 As described in the [opening post -LINK](here), I'm building all my examples for this series around a C implementation of the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) Prime number calculation strategy.  It's a good example problem, because speed matters big time for prime numbers - and the C code that I'm using is not exactly the type of thing you'd be eager to rewrite!  The example I'm using  - [found here](http://wwwhomes.uni-bielefeld.de/achim/prime_sieve.html) - is actually pretty simple, compared to more complex techniques that leverage CPU caching, among other things.  Head over to [primesieve.org](http://primesieve.org/) to get an idea.
 
-To follow along, please take a look at primesieve.c now - I won't bring all the code into the post.  
+To follow along, please take a look at primesieve.c now - although don't get too caught up in the details, we won't need to mess with much (that's the whole point!).
 
-SHOW ENTRY POINT
+<iframe src="http://wwwhomes.uni-bielefeld.de/achim/prime_sieve.c" width="100%" height="200px"/>
 
 ## Modifications to primesieve.c
 When faced with integrating an legacy program, you might not have the luxury of accessing the code.  For the purposes of this article, I'm going to simulate a few common integration scenarios - and I'll edit some bits of the original primesieve.c in order to allow for this.
