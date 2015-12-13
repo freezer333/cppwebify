@@ -1,43 +1,113 @@
 # Automating a C++ program from a Node.js Web app
-Intro to the series (post link back)
+This post is the second in a series of four posts dedicated to showing you how to get your C++ application onto the web by integrating with in Node.js.  In the [first post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), I outlined three general options:
 
-Explain again which circumstance this is best for
+1. **Automation** - call your C++ as a standalone app in a child process.
+2. **Shared library** - pack your C++ routines in a shared library (dll) and call those routines from Node.js directly.
+3. **Node.js Addon** - compile your C++ code as a native Node.js module/addon.
 
-# Primesieve C/C++ implementation
+Each of these options have their advantages and disadvantages, they primarily differ in the degree in which you need to modify your C++, the performance hit you are willing to take when calling C++, and your familiarity / comfort in dealing with Node.js and the V8 API.
+
+This post is all about automation.  **If you haven't ready the [first post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), you might want to check that out first, before going forward.**
+
+## Why use Automation?
+If your C++ runs standalone from a command line - or can be made to do so - you can run your C++ program using Node's [child process](https://nodejs.org/api/child_process.html) API.  This option works for bringing just about anything to the web - it really doesn’t make a difference what language your command line program is written in if you are simply running it.  If you are reading this hoping to get C code, Fortran code, or some other language onto the web - then this option is worth reading.  
+
+Two features of automation make it attractive.  First, since you are executing the C++ application in another process, you are essentially doing the C++ job *asynchronously* - which is a big win on the web since you can process other incoming HTTP traffic while the C++ app is working.  Second, you really don't need to do a great deal of *language integration* or use sophisticated V8 API's - it's actually pretty easy!
+
+All of the code for this series is available on [github](https://github.com/freezer333/cppwebify-tutorial):
+
+```
+> git clone https://github.com/freezer333/cppwebify-tutorial.git
+```
+For this particular post, checkout the **automation** tag
+```
+> git checkout automation
+```
+
+# Case Study:  Primesieve C/C++ implementation
 As described in the [opening post -LINK](here), I'm building all my examples for this series around a C implementation of the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) Prime number calculation strategy.  It's a good example problem, because speed matters big time for prime numbers - and the C code that I'm using is not exactly the type of thing you'd be eager to rewrite!  The example I'm using  - [found here](http://wwwhomes.uni-bielefeld.de/achim/prime_sieve.html) - is actually pretty simple, compared to more complex techniques that leverage CPU caching, among other things.  Head over to [primesieve.org](http://primesieve.org/) to get an idea.
 
-To follow along, please take a look at primesieve.c now - although don't get too caught up in the details, we won't need to mess with much (that's the whole point!).
-
-<iframe src="http://wwwhomes.uni-bielefeld.de/achim/prime_sieve.c" width="100%" height="200px"/>
+To follow along, please take a look at the [original primesieve.c code now](https://gist.github.com/freezer333/ee7c9880c26d3bf83b8e) - although don't get too caught up in the details, we won't need to mess with it much (that's the whole point!).
 
 ## Modifications to primesieve.c
-When faced with integrating an legacy program, you might not have the luxury of accessing the code.  For the purposes of this article, I'm going to simulate a few common integration scenarios - and I'll edit some bits of the original primesieve.c in order to allow for this.
+When faced with integrating a legacy program, you might not have the luxury of accessing the code.  For the purposes of this article, I'm going to simulate a few common integration scenarios - and I'll edit some bits of the original primesieve.c in order to allow for this.
 
-First, we'll want to be able to pass a file descriptor into the main routine, so the program doesn't *always* print to the console.  Let's rename `main` to `generate_args` and add a third parameter for the file descriptor.  We'll make specific use of this in Example 3 below.
+- **Scenario 1:** An app that gets input only from command line arguments, and prints to standard out.
+- **Scenario 2:** An app that gets input from the user (stdin), and prints to standard out.
+- **Scenario 3:** An app that gets input from a file, and outputs to another file.
+
+To be able to simulate each scenario, we'll want to be able to pass a file descriptor into the main routine of primesieve.c, so the program doesn't *always* print to the console.  Let's rename `main` to `generate_args` and add a third parameter for the file descriptor.  We'll make specific use of this in Scenario 3.
+
+``` c++
+// in cppwebify-tutorial/cpp/prime4standalone/prime_sieve.c, I've renamed
+// int main(int argc, char *argv[])
+// to:
+int generate_args(int argc, char * argv[], FILE * out) {
+    ... complicated prime number stuff ...
+
+```
 
 I'll write the entry point in a different file (`main.cpp`), so I'm also adding the declaration of `generate` to a header file called `prime_sieve.c`.
 
-I'm also creating a second function - `generate`, also available through the header, that provides a simplified interfaced - it just accepts the "under" parameter instead of command line arguments.  The definition is at the bottom of prime_sieve.c, and just transforms the parameter into character arguments and calls `generate_args`.  This is just so I don't edit the original code much, and to make Example 2 below a little cleaner.  Obviously, the creative reader can figure out better ways of doing all this :)
+I'm creating a second function - `generate` which provides a simplified interface - it just accepts the "under" parameter instead of command line arguments.  The definition is at the bottom of prime_sieve.c, and just transforms the parameter into character arguments and calls `generate_args`.  This is just so I don't edit the original code much, and to make Scenario 2 below a little cleaner.  Obviously, the imaginative reader can figure out better ways of doing all this :)
 
-So, we're left with the following prime_sieve.h header - appropriately using `extern C` to make sure our C functions can be integrated correctly with the C++ main files I'll use in the examples.
-
-```c
-extern "C" {
-    // the old main, renamed - with a third parameter
-    // to direct output to a file as needed
-    int generate_args(int argc, char *argv[], FILE * out);
-
-    // an adapter function when the caller hasn't
-    // received under through command line arguments
-    int generate(int under, FILE *out);
+``` c++
+// at the bottom of cppwebify-tutorial/cpp/prime4standalone/prime_sieve.c,
+// an adapter function for use when we aren't using command-line arguments
+int generate(int under, FILE *out) {
+  char * name = "primes";
+  char param [50];
+  sprintf(param, "%d", under);
+  char * values[] = { name, param};
+  do_primesieve(2, values, out);
 }
 ```
 
-# The Node.js Child Process API
-Do a detailed overview of the different options.
-Why the sync options aren't good for the web
+So, we're left with the following prime_sieve.h header - using `extern C` to make sure our C functions can be integrated correctly with the C++ main files I'll use in the examples.
 
-# Example 1:  C++ Program that gets input command-line arguments
+```c++
+extern "C" {
+    // the old main, renamed - with a third parameter"
+    // to direct output to a file as needed
+    int generate_args(int argc, char * argv[], FILE * out);
+
+    // an adapter function when the caller hasn't
+    // received under through command line arguments
+    int generate(int under, FILE * out);
+}
+
+```
+
+# The Node.js Child Process API
+Node.js contains a `child_process` module which exposes a robust API for creating and controlling processes.  There are three basic calls for creating new child processes - each with their own use cases.
+
+The first is `execFile`, which accepts (at a minimum) a file path to an executable program.  You may pass an array of arguments that will be called with the program.  The last parameter to the function call is a callback that will be executed when the program terminates.  This callback will have an error, a stdout buffer, and a stderr buffer given to it, which can be used to interrogate the program's output  It's important to note that this callback is only called after the program executes.  `execFile` also returns an object representing the child process, and you may write to it's stdin stream.
+
+```js
+var execFile = require('child_process').execFile
+
+// this launches the executable and returns immediately
+var child = execFile("path to executable", ["arg1", "arg2"],
+  function (error, stdout, stderr) {
+    // This callback is invoked once the child terminates
+    // You'd want to check err/stderr as well!
+    console.log("Here is the complete output of the program: ");
+    console.log(stdout)
+});
+
+// if the program needs input on stdin, you can write to it immediately
+child.stdin.setEncoding('utf-8');
+child.stdin.write("Hello my child!\n");
+```
+
+I find the `execFile` function is best when you have to automate an application that has well-defined input and operates in sort of a "single phase" - meaning once you give it some input it goes off for a while, and the dumps all of it's output.  This is precisely the type of program the prime sieve program is - so we'll use execFile throughout this post.
+
+The `child_process` module has two other functions to create processes - `spawn` and `exec`.  `spawn` is a lot like `execFile`, it accepts an executable and launches it.  The difference is that `spawn` will give you a streamable interface to stdout and stderr.  This works really well for more complex I/O scenarios where there is a back and forth dialog between your node code and the C++ app.  `exec` is again very similar to `execFile`, but is used for shell programs (ls, pipes, etc).
+
+## Synchronous options
+In Node.js v0.12 a [new set of API's](https://strongloop.com/strongblog/whats-new-in-node-js-v0-12-execsync-a-synchronous-api-for-child-processes/) was introduced which allows you to execute child applications *synchronously* - your program will block when you start the child process and resume when the child process terminates (and sends you back it's output).  This is fantastic if you are running shell scripts, but it's decidedly *not* for web applications.  For our prime number demo, certainly when we get an HTTP request for prime numbers we need to wait for the complete output before serving the page of results to the browser - *but we should be able to continue serving **other HTTP** requests from other browsers* in the meantime!  Unless you have a really specific reason, you'll want to stay away from `spawnSync`, `execSync`, and `execFileSync` when writing web servers.
+
+# Scenario 1:  C++ Program that gets input command-line arguments
 The simplest type of program to automate is a program that will accept all of it's input as command line arguments and dump it's output to stdout - so we'll start with this scenario.
 
 So - let's "imagine" primeieve works like this (actually, it basically already does!).  To use the application, we might type:
@@ -55,10 +125,124 @@ And we'd get all prime numbers under 10 print out to the screen (one on each lin
 
 *I'll keep the output easy to parse in all my example - obviously if your program spits out data in a tough-to-parse way, you'll have a bit more work to do.*
 
-## Using node-gyp to compile
-## Automating from Node.js
+## Using node-gyp to compile the prime sieve C++
+Our first step is to actually get an executable C++ application!  The C++ code in `cpp/prime4standalone` doesn't have an entry point - it's just the prime number generation code, and it will be shared across all 3 of the scenarios we're covering in this post.  In `cpp/standalone_stdio` I've created an entry point:
 
-# Example 2:  C++ Program that gets input from user (stdin)
+```c++
+#include <iostream>
+#include <stdio.h>
+#include "prime_sieve.h"
+using namespace std;
+
+int main(int argc, char ** argvs) {
+    generate_args(argc, argvs, stdout);
+}
+```
+
+The next step is to build the C++ executable - compiling together all three files:
+1. `cpp/standalone_stdio/main.cpp`
+2. `cpp/prime4standalone/prime_sieve.h`
+3. `cpp/prime4standalone/prime_sieve.c`
+
+If you are familiar with building C++, you'll have no trouble doing this with whatever your favorite compiler platform is.  For this tutorial we're going to eventually need to use `node-gyp`, which is node's wrapper around Google's `gyp` build system - so I've setup all the C++ examples this way.
+
+We'll need to first install node-gyp:
+
+```
+> npm install -g node-gyp
+```
+To build this C++ app, type `node-gyp configure build` from the terminal at `cpp/standalone_stdio`.  You'll need to make sure you have a C++ compiler installed on your system - node-gyp will use whatever you have depending on your system (Windows will require the VS command line compiler tools).
+
+How did this work?  In `/cpp/standalone_stdio` you'll find a `binding.gyp` file.  This contains all the information needed to build this particular example with node-gyp - think of it as a Makefile.
+
+```js
+{
+  "targets": [
+    {
+      "target_name": "standalone",
+      "type": "executable",
+      "sources": [ "../prime4standalone/prime_sieve.c", "main.cpp"],
+      "cflags": ["-Wall", "-std=c++11"],
+      "include_dirs" : ['../prime4standalone'],
+      "conditions": [
+        [ 'OS=="mac"', {
+            "xcode_settings": {
+                'OTHER_CPLUSPLUSFLAGS' : ['-std=c++11','-stdlib=libc++'],
+                'OTHER_LDFLAGS': ['-stdlib=libc++'],
+                'MACOSX_DEPLOYMENT_TARGET': '10.7' }
+            }
+        ]
+      ]
+    }
+  ]
+}
+```
+
+Lets cover a few basics.  We only have one target defined ("standalone") - so it has become the default.  It's `type` is critical here, because node-gyp can also compile shared libraries and native Node.js addons (which is why it's so useful for this blog series!).  Setting `type` to `executable` tells node-gyp to create a standard runnable executable.  The `sources` array contains our source (the header is not needed, but could be added).  Since a lot of my C++ later in this tutorial will make use of C++11, I'm also passing in a few compiler flags in the `cflags` property.  I also pass along OS X specific stuff to make C++11 work on a Mac with XCode.  These special options are included in the `conditions` property and are ignored under Linux and Windows.  Finally, I've made sure the compiler can find the include file by adding in the path under the `include_dirs` property.
+
+The result of our build operation - `node-gyp configure build` should create an executable in `cpp/standalone_stdio/build/Release` called `standalone`.  You should be able to run it directly from the command line.  Now let's run it from Node.js.
+
+## Automating from Node.js
+In the [first post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js) I setup a really simple Node.js web application that had a single route that could calculate prime numbers using a pure JavaScript prime sieve implementation.  Now we'll create a second route that uses our C++ implementation.
+
+In `cppwebify-tutorial/web/index.js` first we'll add a new entry in our `types` array for the new C++ route:
+
+```js
+var types = [
+  {
+    title: "pure_node",
+    description: "Execute a really primitive implementation of prime sieve in Node.js"
+  },
+  {
+    title: "standalone_args",
+    description: "Execute C++ executable as a child process, using command line args and stdout.  Based on /cpp/standalone_stdio"
+  }];
+```
+
+That type array is used to create the routes by looking for a file named after each `title` property in the `web/routes/` directory:
+
+```js
+types.forEach(function (type) {
+    app.use('/'+type.title, require('./routes/' + type.title));
+});
+```
+
+Now let's add our route in `/web/routes/standalone_args`.  If you take a look, lines 1-9 are basically the same as the `pure_node` example - line 11 is where we start respond to an actual user request for prime numbers by executing the C++ app:
+
+```js
+router.post('/', function(req, res) {
+    var execFile = require('child_process').execFile
+    // we build this with node-gyp above...
+    var program = "../cpp/standalone_stdio/build/Release/standalone";
+
+    // from the browser
+    var under = parseInt(req.body.under);
+    var child = execFile(program, [under],
+      function (error, stdout, stderr) {
+        // The output of the prime_sieve function has one prime number per line.  
+        // The last 3 lines are additional information, which we aren't using here -
+        // so I'm slicing the stdout array and mapping each line to an int.
+        // You'll certainly want to be a bit more careful parsing your program's output!
+        var primes = stdout.split("\n").slice(0, -3)
+                           .map(function (line) {
+                             return parseInt(line);
+                           });
+
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({
+          results: primes
+        }));
+
+        console.log("Primes generated from " + type);
+    });
+});
+```
+While you'll likely need to be a bit more robust when handling program output (and dealing with input from the browser), as you can see it's pretty simple to call your child process and return a response to the browser.  Go ahead and run the web app by typing `node index.js` in your terminal under `cppwebify-tutorial/web` and point your browser to `http://localhost:3000/`.  Choose the "standalone_args" strategy, you can enter 100 to get all the primes under 100 - this time using a much faster C-based implementation!
+
+![Results for primes under 100](img002.png)
+
+# Scenario 2:  C++ Program that gets input from user (stdin)
+
 
 ## Modifications to primesieve.c
 

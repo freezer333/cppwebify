@@ -11,17 +11,17 @@ router.get('/', function(req, res) {
 router.post('/', function(req, res) {
 
     // I'm using exec, but if you don't want to
-    // buffer all the output, but use it incrementally, 
+    // buffer all the output, but use it incrementally,
     // you'd use the other methods (ie. streaming).
     // That would be more effective if you were
     // streaming the results to the browser, but here
     // we need all the primes to render the response anyway...
-    var exec = require('child_process').execFile
+    var execFile = require('child_process').execFile
     var program = "../cpp/standalone_stdio/build/Release/standalone";
 
 
     var under = parseInt(req.body.under);
-    var output = exec(program, [under],
+    var child = execFile(program, [under],
       function (error, stdout, stderr) {
         var primes = stdout.split("\n")
                        .slice(0, -3)
@@ -38,8 +38,8 @@ router.post('/', function(req, res) {
     });
 
 
-    
+
 });
 
-  
+
 module.exports = router;

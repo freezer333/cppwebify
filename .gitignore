@@ -10,8 +10,6 @@ stamp-h1
 *.o
 .libs
 .dirstamp
-primesieve
-cpp/*/build/
 node_modules/
 npm-debug.log
 .DS_Store
