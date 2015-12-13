@@ -242,10 +242,80 @@ While you'll likely need to be a bit more robust when handling program output (a
 ![Results for primes under 100](img002.png)
 
 # Scenario 2:  C++ Program that gets input from user (stdin)
+Lots of programs as an actual user for their input.  If you have access to the code of your program, it's probably easy to change it so it accepts these inputs as command line args - which means you could just use the strategy in Scenario 1.  Sometimes this won't work though - like if you don't even have the source code!  It also doesn't work when automating a program that actually has a bit of a dialog with the user, which you need to simulate through node.  No worries though - writing to stdin is pretty straightforward, especially if you don't need to wait for any output from the child process first (if you do, check out `spawn` instead of `execFile` by the way).
 
+## Building the C++ example
+In `cpp/standalone_usr` I've created a new entry point for a C++ program that simply asks the user for the `under` parameter the prime sieve algorithm needs.
 
-## Modifications to primesieve.c
+```c++
+#include <iostream>
+#include <stdio.h>
+#include "prime_sieve.h"
+using namespace std;
 
+int main(int argc, char ** argvs) {
+    int max;
+    cout << "Please enter the maximum number:  ";
+    cin  >> max;
+    generate_primes(max, stdout);
+}
+```
+
+It's including the very same prime_sieve.h file as the code in Scenario 1, and is build with a strikingly similar `bingind.gyp` file.  Go ahead and build that with `node-gyp configure build` at the terminal from `cpp/standalone_usr`.
+
+## Writing to stdin to automate from Node.js
+With the new executable built, we can now drop yet another route into our web app.  In `web/index.js` we'll create another type entry:
+
+```js
+var types = [
+  {
+    title: "pure_node",
+    description: "Execute a really primitive implementation of prime sieve in Node.js"
+  },
+  {
+    title: "standalone_args",
+    description: "Execute C++ executable as a child process, using command line args and stdout.  Based on /cpp/standalone_stdio"
+  },
+  {
+    title: "standalone_usr",
+    description: "Execute C++ executable as a child process, using direct user input.  Based on /cpp/standalone_usr"
+  }];
+```
+
+And we'll create a new route at `web/routes/standalone_usr.js`.  In this file, our code will no longer pass `under` as a command line argument however, instead we'll write to stdin:
+
+```js
+router.post('/', function(req, res) {
+    var execFile = require('child_process').execFile
+    // notice we're pointing this to the new executable
+    var program = "../cpp/standalone_usr/build/Release/standalone_usr";
+
+    var under = parseInt(req.body.under);
+    // execFile will return immediately.
+    var child = execFile(program, [],
+      function (error, stdout, stderr) {
+        // This function is still executed once the program terminates...
+        var primes = stdout.split("\n").slice(0, -3)
+                       .map(function (line) {
+                           return parseInt(line);
+                       });
+
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({
+          results: primes
+        }));
+
+        console.log("Primes generated from " + type);
+    });
+
+    // now we write "under" to stdin so the C++ program can proceed (it's blocking
+    // for user input)
+    child.stdin.setEncoding('utf-8');
+    child.stdin.write(under + "\n");
+    // Once the stdin is written, the C++ completes and the callback above is invoked.
+});
+```
+By now you probable have the idea.. fire up the web app again and now you'll have a third entry at the start page - go ahead and test it out!
 
 # Example 3:  C++ Program that gets output from input file
 

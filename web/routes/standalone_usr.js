@@ -11,11 +11,11 @@ router.get('/', function(req, res) {
 
 router.post('/', function(req, res) {
 
-    var exec = require('child_process').execFile
+    var execFile = require('child_process').execFile
     var program = "../cpp/standalone_usr/build/Release/standalone_usr";
 
     var under = parseInt(req.body.under);
-    var child = exec(program, [],
+    var child = execFile(program, [],
       function (error, stdout, stderr) {
         var primes = stdout.split("\n")
                        .slice(0, -3)
@@ -35,13 +35,8 @@ router.post('/', function(req, res) {
     child.stdin.write(under + "\n");
 
 
-    
+
 });
 
-  
+
 module.exports = router;
-
-
-
-
-
