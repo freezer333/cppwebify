@@ -19,13 +19,15 @@ All of the code for this series is available on [github](https://github.com/free
 ```
 > git clone https://github.com/freezer333/cppwebify-tutorial.git
 ```
+
 For this particular post, checkout the **automation** tag
+
 ```
 > git checkout automation
 ```
 
 # Case Study:  Primesieve C/C++ implementation
-As described in the [opening post -LINK](here), I'm building all my examples for this series around a C implementation of the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) Prime number calculation strategy.  It's a good example problem, because speed matters big time for prime numbers - and the C code that I'm using is not exactly the type of thing you'd be eager to rewrite!  The example I'm using  - [found here](http://wwwhomes.uni-bielefeld.de/achim/prime_sieve.html) - is actually pretty simple, compared to more complex techniques that leverage CPU caching, among other things.  Head over to [primesieve.org](http://primesieve.org/) to get an idea.
+As described in the [opening post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), I'm building all my examples for this series around a C implementation of the [Sieve of Eratosthenes](https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes) Prime number calculation strategy.  It's a good example problem, because speed matters big time for prime numbers - and the C code that I'm using is not exactly the type of thing you'd be eager to rewrite!  The example I'm using  - [found here](http://wwwhomes.uni-bielefeld.de/achim/prime_sieve.html) - is actually pretty simple, compared to more complex techniques that leverage CPU caching, among other things.  Head over to [primesieve.org](http://primesieve.org/) to get an idea.
 
 To follow along, please take a look at the [original primesieve.c code now](https://gist.github.com/freezer333/ee7c9880c26d3bf83b8e) - although don't get too caught up in the details, we won't need to mess with it much (that's the whole point!).
 
@@ -110,7 +112,7 @@ In Node.js v0.12 a [new set of API's](https://strongloop.com/strongblog/whats-ne
 # Scenario 1:  C++ Program that gets input command-line arguments
 The simplest type of program to automate is a program that will accept all of it's input as command line arguments and dump it's output to stdout - so we'll start with this scenario.
 
-So - let's "imagine" primeieve works like this (actually, it basically already does!).  To use the application, we might type:
+So - let's "imagine" prime sieve works like this (actually, it basically already does!).  To use the application, we might type:
 
 ```
 > primesieve 10
@@ -317,12 +319,105 @@ router.post('/', function(req, res) {
 ```
 By now you probable have the idea.. fire up the web app again and now you'll have a third entry at the start page - go ahead and test it out!
 
-# Example 3:  C++ Program that gets output from input file
+# Scenario 3:  Automating a file-based C++ program
+The last scenario I'll go over is where the program you are automating takes its input from a file, and dumps its output to a another file.  Of course, your scenario might be a combination of the three scenarios discussed here - and your scenario might involved a fixed filename for input/output, or a user specified (via stdin, or command line arguments).  Whatever your situation with files, you'll likely be able to apply what's here.
 
-## Modifications to primesieve.code
+## Modifications to prime sieve to use files
+So the first step is to shape the prime sieve into something resembling a file-based program.  If you take a look at `cpp/standalone_flex_file`, I've created a third entry point for prime sieve that accepts input/output filenames along the command line.  The input file is assumed to simply have "under" on the first line.  The output file will receive the same lines of results as previously went to stdin.
 
+```c++
+#include <iostream>
+#include <stdio.h>
+#include "prime_sieve.h"
 
-## Dealing with File-based program on the web
-You have multiple simultaneous requests - need to protect input/output File-based
+using namespace std;
 
-# Conclusion, up next
+// Simulating a legacy app that reads
+// it's input from a user-specified file via command line
+// arguments, and outputs to a similarly specified file.
+int main(int argc, char ** argvs) {
+    FILE * in = fopen(argvs[1], "r");
+    int i;
+    fscanf (in, "%d", &i);
+    fclose(in);
+
+    FILE * out = fopen(argvs[2], "w");
+    generate_primes(i, out);
+    fprintf(stdout, "Output saved in %s\n", argvs[2]);
+    fclose(out);
+}
+```
+We can build this C++ program by issuing the familiar `node-gyp configure build` from `cpp/standalone_flex_file`.  This will generate a target executable we can use from node.
+
+## Dealing with file-based program on the web
+Before diving into the Node.js route for this scenario, lets talk about the challenge involved in a file-based program.  Most applications never meant for the web will read a specified input file and write to an output file as if the application is the only thing running... and as if it's not running alongside another instance of the same program!  This makes sense when these applications were being run manually - but if you are placing them on the web you can easily have multiple simultaneous requests (from different browsers) coming in at the same time.  It's critical that these simultaneous executions of your legacy C++ program don't collide with each other - you need to ensure they are reading from and writing to their own distinct files!
+
+When you don't have access to the legacy source code, this can be easier said than done, especially if the app does not let the user specify the files (i.e. they are hardcoded in the program!).  If they are hardcoded, but relative file paths, then I usually create a copy of the executable in a temporary directory on each incoming web requests.  It's costly performance-wise, but it works.  If the files paths are hard coded to absolute paths, you have quite a problem (find the code!).
+
+I've simulated the easiest (but most common) situation, where the input and output files can be specified by the user (in this case, via command line arguments).  All we need to do is make sure each web request that launches the C++ app picks unique filenames - and I usually do this by creating temporary directories on each web request, placing the input/output files within the temporary directory.  This shields each running instance from the others, while keeping the input/output names consistent.
+
+So now lets jump the Node.js route.  At the top of `web/routes/standalone_file.js` I've required the `temp` module, which I use to handle the creation of temporary directories and files.  It drops the temporaries in the appropriate location for your platform.
+
+```js
+var temp = require('temp');
+```
+
+Below is the route code found in `web/routes/standalone_file.js`.  
+
+```js
+router.post('/', function(req, res) {
+    var execFile = require('child_process').execFile
+    var program = "../cpp/standalone_flex_file/build/Release/standalone_flex_file";
+    var under = parseInt(req.body.under);
+
+    // Create a temporary directory, with node_example as the prefix
+    temp.mkdir('node_example', function(err, dirPath) {
+      // build full paths for the input/output files
+      var inputPath = path.join(dirPath, 'input.txt');
+      var outputPath = path.join(dirPath, 'output.txt');
+
+      // write the "under" value to the input files
+      fs.writeFile(inputPath, under, function(err) {
+        if (err) throw err;
+
+        // once the input file is ready, execute the C++ app with the input and
+        // output paths specified on the command line
+        var primes = execFile(program, [inputPath, outputPath], function(error) {
+            if (error ) throw error;
+            fs.readFile(outputPath, function(err, data) {
+              if (err) throw err;
+              var primes = data.toString().split('\n').slice(0, -3)
+                              .map(function (line) {
+                                  return parseInt(line);
+                              });
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({
+                results: primes
+              }));
+
+              exec('rm -r ' + dirPath, function(error) {
+                if (error) throw error;
+                console.log("Removed " + dirPath);
+              })
+          });
+        });
+      });
+    });
+});
+```
+The above code first creates the temporary directory.  It then writes the input file and launches the
+child process with the input and output file paths as command line arguments.  Once the process completes,
+we read the output file to get the results, serving it back to the browser just like before.  Finally, we clean
+up the temporary files by removing parent directory.  This is important, since even though the `temp` module allows
+for tracking and automatic deletion of temporary files, it only cleans things up when the process terminates.  Since this is a
+web app, we would (hopefully!) be waiting a long time for this to happen.
+
+As you can see, this code would benefit from better control flow patterns(async, promises, etc).  I'm trying to stick to
+the bare minimum, I'll leave that to you :).  
+
+Aside from the route above, I've added this final scenario to the `types` array in `web/index.js` and you can start your web app and test this one out just like the others.
+
+# Up next...
+This post presented the first option introduced in the series - automation.  It works really well when you really have your hands tied - like if you can't edit the source code of the legacy C++ app.  It also allows for asynchronous execution of the C++ code, and limits the work you need to do.  There is, however, a large cost to launching processes.  Not only is it a relatively slow operation, it is also resource intensive.  If you expect a lot of traffic, you'll quickly realize that launching a new process for each incoming request doesn't scale well at all.
+
+In the next post, I'll take a look at the second option - compiling your C++ code into a shared library/DLL and calling it from Node.js.  This option offers better scalability because the C++ code is executed in process - however it does block your event loop.  It also allows your Node.js code to make many calls into the DLL, giving you more fine-grained interaction.  In this next post, I'll specifically cover compiling shared libraries in `node-gyp` as well as using the [`ffi`]((https://github.com/node-ffi/node-ffi)) module for Node.js to interact with it.
