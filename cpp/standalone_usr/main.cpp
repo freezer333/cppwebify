@@ -14,5 +14,5 @@ int main(int argc, char ** argvs) {
     int max;
     cout << "Please enter the maximum number:  ";
     cin  >> max;
-    generate_primes(max, stdout);
+    generate(max, stdout);
 }
