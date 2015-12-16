@@ -241,7 +241,7 @@ router.post('/', function(req, res) {
 ```
 While you'll likely need to be a bit more robust when handling program output (and dealing with input from the browser), as you can see it's pretty simple to call your child process and return a response to the browser.  Go ahead and run the web app by typing `node index.js` in your terminal under `cppwebify-tutorial/web` and point your browser to `http://localhost:3000/`.  Choose the "standalone_args" strategy, you can enter 100 to get all the primes under 100 - this time using a much faster C-based implementation!
 
-![Results for primes under 100](img002.png)
+![Results for primes under 100](https://raw.githubusercontent.com/freezer333/cppwebify/master/posts/img002.png)
 
 # Scenario 2:  C++ Program that gets input from user (stdin)
 Lots of programs as an actual user for their input.  If you have access to the code of your program, it's probably easy to change it so it accepts these inputs as command line args - which means you could just use the strategy in Scenario 1.  Sometimes this won't work though - like if you don't even have the source code!  It also doesn't work when automating a program that actually has a bit of a dialog with the user, which you need to simulate through node.  No worries though - writing to stdin is pretty straightforward, especially if you don't need to wait for any output from the child process first (if you do, check out `spawn` instead of `execFile` by the way).
@@ -263,7 +263,7 @@ int main(int argc, char ** argvs) {
 }
 ```
 
-It's including the very same prime_sieve.h file as the code in Scenario 1, and is build with a strikingly similar `bingind.gyp` file.  Go ahead and build that with `node-gyp configure build` at the terminal from `cpp/standalone_usr`.
+It's including the very same prime_sieve.h file as the code in Scenario 1, and is build with a strikingly similar `binding.gyp` file.  Go ahead and build that with `node-gyp configure build` at the terminal from `cpp/standalone_usr`.
 
 ## Writing to stdin to automate from Node.js
 With the new executable built, we can now drop yet another route into our web app.  In `web/index.js` we'll create another type entry:
@@ -317,7 +317,7 @@ router.post('/', function(req, res) {
     // Once the stdin is written, the C++ completes and the callback above is invoked.
 });
 ```
-By now you probable have the idea.. fire up the web app again and now you'll have a third entry at the start page - go ahead and test it out!
+By now you probably have the idea.. fire up the web app again and now you'll have a third entry at the start page - go ahead and test it out!
 
 # Scenario 3:  Automating a file-based C++ program
 The last scenario I'll go over is where the program you are automating takes its input from a file, and dumps its output to a another file.  Of course, your scenario might be a combination of the three scenarios discussed here - and your scenario might involved a fixed filename for input/output, or a user specified (via stdin, or command line arguments).  Whatever your situation with files, you'll likely be able to apply what's here.
@@ -420,4 +420,4 @@ Aside from the route above, I've added this final scenario to the `types` array 
 # Up next...
 This post presented the first option introduced in the series - automation.  It works really well when you really have your hands tied - like if you can't edit the source code of the legacy C++ app.  It also allows for asynchronous execution of the C++ code, and limits the work you need to do.  There is, however, a large cost to launching processes.  Not only is it a relatively slow operation, it is also resource intensive.  If you expect a lot of traffic, you'll quickly realize that launching a new process for each incoming request doesn't scale well at all.
 
-In the next post, I'll take a look at the second option - compiling your C++ code into a shared library/DLL and calling it from Node.js.  This option offers better scalability because the C++ code is executed in process - however it does block your event loop.  It also allows your Node.js code to make many calls into the DLL, giving you more fine-grained interaction.  In this next post, I'll specifically cover compiling shared libraries in `node-gyp` as well as using the [`ffi`]((https://github.com/node-ffi/node-ffi)) module for Node.js to interact with it.
+In the next post, I'll take a look at the second option - compiling your C++ code into a shared library/DLL and calling it from Node.js.  This option offers better scalability because the C++ code is executed in process - however it does block your event loop.  It also allows your Node.js code to make many calls into the DLL, giving you more fine-grained interaction.  In this next post, I'll specifically cover compiling shared libraries in `node-gyp` as well as using the [`ffi`](https://github.com/node-ffi/node-ffi) module for Node.js to interact with it.
