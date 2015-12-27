@@ -19,14 +19,14 @@ router.post('/', function(req, res) {
     var under = parseInt(req.body.under);
     var a = new IntArray(under);
 
-    
+
     var libprime = ffi.Library('../cpp/lib4ffi/build/Release/prime', {
       'getPrimes': [ int, [ int, IntArray] ]
     })
 
     var count = libprime.getPrimes(under, a);
     var primes = a.toArray().slice(0, count);
-    
+
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({
       results: primes
@@ -34,6 +34,4 @@ router.post('/', function(req, res) {
 
     console.log("Primes generated using " + type);
 });
-
-  
 module.exports = router;

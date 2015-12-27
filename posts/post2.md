@@ -7,7 +7,7 @@ This post is the second in a series of four posts dedicated to showing you how t
 
 Each of these options have their advantages and disadvantages, they primarily differ in the degree in which you need to modify your C++, the performance hit you are willing to take when calling C++, and your familiarity / comfort in dealing with Node.js and the V8 API.
 
-This post is all about automation.  **If you haven't ready the [first post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), you might want to check that out first, before going forward.**
+This post is all about automation.  **If you haven't read the [first post](http://blog.scottfrees.com/getting-your-c-to-the-web-with-node-js), you might want to check that out first, before going forward.**
 
 ## Why use Automation?
 If your C++ runs standalone from a command line - or can be made to do so - you can run your C++ program using Node's [child process](https://nodejs.org/api/child_process.html) API.  This option works for bringing just about anything to the web - it really doesn’t make a difference what language your command line program is written in if you are simply running it.  If you are reading this hoping to get C code, Fortran code, or some other language onto the web - then this option is worth reading.  
