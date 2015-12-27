@@ -642,5 +642,5 @@ int generate(int under, FILE *out) {
   char param [50];
   sprintf(param, "%d", under);
   char * values[] = { name, param};
-  do_primesieve(2, values, out);
+  generate_args(2, values, out);
 }

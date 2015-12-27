@@ -15,7 +15,7 @@ int main(int argc, char ** argvs) {
     fclose(in);
 
     FILE * out = fopen(argvs[2], "w");
-    generate_primes(i, out);
+    generate(i, out);
     fprintf(stdout, "Output saved in %s\n", argvs[2]);
     fclose(out);
 }
